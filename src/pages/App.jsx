@@ -4,7 +4,6 @@ import "antd/dist/reset.css";
 
 const API_URL = "https://graphql.emelia.io/graphql";
 const API_KEY = "QzEH81tPCPigkWt2dOLNxP996aTqEvCbTq5mAGdQy6zKBR4D";
-
 const REST_STATS_URL = "https://graphql.emelia.io/stats";
 
 const headers = {
@@ -18,7 +17,7 @@ const App = () => {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
 
-  // Fetch list of campaigns
+  // 1) Chargement de la liste des campagnes
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
@@ -44,13 +43,14 @@ const App = () => {
     fetchCampaigns();
   }, []);
 
-  // Fetch stats for selected campaign
+  // 2) Chargement des stats REST pour la campagne sélectionnée
   useEffect(() => {
     if (!selected) return;
 
     const fetchStats = async () => {
       setError(null);
       setStats(null);
+
       try {
         const response = await fetch(
           `${REST_STATS_URL}?campaignId=${selected}&detailed=true`,
@@ -62,16 +62,16 @@ const App = () => {
         }
 
         const data = await response.json();
+        console.log("Réponse brute Emelia :", data);
+
         const global = data[0]?.global;
-        if (!global) {
-          throw new Error("Données statistiques introuvables");
-        }
+        // if (!global) throw new Error("Données statistiques introuvables");
 
         setStats({
-          sent: global.sent,
-          replied: global.replied,
-          bounced: global.bounced,
-          unsubscribed: global.unsubscribed,
+          sent: global?.sent ?? 0,
+          replied: global?.replied ?? 0,
+          bounced: global?.bounced ?? 0,
+          unsubscribed: global?.unsubscribed ?? 0,
         });
       } catch (err) {
         console.error(err);
@@ -86,9 +86,7 @@ const App = () => {
     <div style={{ padding: 20, fontFamily: "Arial, sans-serif" }}>
       <h1>Suivi Campagne</h1>
 
-      {error && (
-        <p style={{ color: "red", marginBottom: 20 }}>{error}</p>
-      )}
+      {error && <p style={{ color: "red", marginBottom: 20 }}>{error}</p>}
 
       <label htmlFor="campaign-select">Choisir une campagne :</label>
       <select
