@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { request } from "graphql-request";
+import "antd/dist/reset.css";
 
 const API_URL = "https://graphql.emelia.io/graphql";
 const API_KEY = "QzEH81tPCPigkWt2dOLNxP996aTqEvCbTq5mAGdQy6zKBR4D";
 
+const REST_STATS_URL = "https://graphql.emelia.io/stats";
+
 const headers = {
   Authorization: `Bearer ${API_KEY}`,
-  "Content-Type": "application/json"
+  "Content-Type": "application/json",
 };
 
 const App = () => {
@@ -15,6 +18,7 @@ const App = () => {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
 
+  // Fetch list of campaigns
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
@@ -33,62 +37,65 @@ const App = () => {
         );
         setCampaigns(data.campaigns);
       } catch (err) {
-        setError("Erreur lors du chargement des campagnes.");
         console.error(err);
+        setError("Erreur lors du chargement des campagnes.");
       }
     };
     fetchCampaigns();
   }, []);
 
-useEffect(() => {
-  if (!selected) return;
+  // Fetch stats for selected campaign
+  useEffect(() => {
+    if (!selected) return;
 
-  const fetchStats = async () => {
-    try {
-      const response = await fetch(
-        `https://graphql.emelia.io/stats?campaignId=${selected}&detailed=true`,
-        {
-          headers: {
-            Authorization: "xRCRPFCWM7z7T3hxX5AkA1TPW6oIxpNi1tpebL9iX5G4VI",
-            "Content-Type": "application/json",
-          },
+    const fetchStats = async () => {
+      setError(null);
+      setStats(null);
+      try {
+        const response = await fetch(
+          `${REST_STATS_URL}?campaignId=${selected}&detailed=true`,
+          { headers }
+        );
+
+        if (!response.ok) {
+          throw new Error("Erreur réseau");
         }
-      );
 
-      if (!response.ok) {
-        throw new Error("Erreur lors de la récupération des stats");
+        const data = await response.json();
+        const global = data[0]?.global;
+        if (!global) {
+          throw new Error("Données statistiques introuvables");
+        }
+
+        setStats({
+          sent: global.sent,
+          replied: global.replied,
+          bounced: global.bounced,
+          unsubscribed: global.unsubscribed,
+        });
+      } catch (err) {
+        console.error(err);
+        setError("Erreur lors du chargement des KPI.");
       }
+    };
 
-      const data = await response.json();
-
-      // Attention : adapter selon la structure de `data`
-      setStats({
-        sent: data.sent || 0,
-        replied: data.replied || 0,
-        bounced: data.bounced || 0,
-        unsubscribed: data.unsubscribed || 0,
-      });
-    } catch (err) {
-      setError("Erreur lors du chargement des KPI.");
-      console.error(err);
-    }
-  };
-
-  fetchStats();
-}, [selected]);
-
+    fetchStats();
+  }, [selected]);
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 20, fontFamily: "Arial, sans-serif" }}>
       <h1>Suivi Campagne</h1>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && (
+        <p style={{ color: "red", marginBottom: 20 }}>{error}</p>
+      )}
 
-      <label>Choisir une campagne :</label>
+      <label htmlFor="campaign-select">Choisir une campagne :</label>
       <select
+        id="campaign-select"
         value={selected}
         onChange={(e) => setSelected(e.target.value)}
-        style={{ marginLeft: 10 }}
+        style={{ marginLeft: 10, padding: 4 }}
       >
         <option value="">--</option>
         {campaigns.map((c) => (
@@ -99,8 +106,8 @@ useEffect(() => {
       </select>
 
       {stats && (
-        <div style={{ marginTop: 20 }}>
-          <h2>KPI Campagne</h2>
+        <div style={{ marginTop: 30 }}>
+          <h2>KPI Globaux</h2>
           <p>📤 Emails envoyés : {stats.sent}</p>
           <p>💬 Réponses : {stats.replied}</p>
           <p>❌ Bounces : {stats.bounced}</p>
