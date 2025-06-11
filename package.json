@@ -8,9 +8,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@refinedev/core": "^4.57.9",        // dernière version publiée :contentReference[oaicite:0]{index=0}
-    "@refinedev/antd": "^5.46.1",       // dernière version publiée :contentReference[oaicite:1]{index=1}
-    "antd": "^5.6.5",                   // version 5 d’Ant Design compatible
+    "@refinedev/core": "^4.57.9",
+    "@refinedev/antd": "^5.46.1",
+    "antd": "^5.6.5",
     "graphql-request": "^6.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
