@@ -8,14 +8,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@refinedev/core": "^4.0.0",
-    "@refinedev/antd": "^4.0.0",
-    "graphql-request": "^6.0.0",
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-router-dom": "^6.0.0"
+    "@refinedev/core": "^4.11.2",
+    "@refinedev/antd": "^4.11.2",
+    "graphql-request": "^6.1.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.14.2"
   },
   "devDependencies": {
-    "vite": "^5.0.0"
+    "vite": "^5.2.0",
+    "@vitejs/plugin-react": "^4.2.1"
   }
 }
