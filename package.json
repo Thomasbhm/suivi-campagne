@@ -8,8 +8,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@refinedev/core": "^4.11.2",
-    "@refinedev/antd": "^4.11.2",
+    "@refinedev/core": "^4.7.4",
+    "@refinedev/antd": "^4.7.4",
     "graphql-request": "^6.1.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
