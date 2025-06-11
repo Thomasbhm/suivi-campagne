@@ -11,47 +11,80 @@ const headers = {
 
 const App = () => {
   const [campaigns, setCampaigns] = useState([]);
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState("");
   const [stats, setStats] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    request(API_URL, `
-      query {
-        campaigns {
-          _id
-          name
-        }
+    const fetchCampaigns = async () => {
+      try {
+        const data = await request(
+          API_URL,
+          `
+            query {
+              campaigns {
+                _id
+                name
+              }
+            }
+          `,
+          {},
+          headers
+        );
+        setCampaigns(data.campaigns);
+      } catch (err) {
+        setError("Erreur lors du chargement des campagnes.");
+        console.error(err);
       }
-    `, {}, headers).then(data => {
-      setCampaigns(data.campaigns);
-    });
+    };
+    fetchCampaigns();
   }, []);
 
   useEffect(() => {
-    if (selected) {
-      request(API_URL, `
-        query {
-          get_email_campaign_statistics(campaignId: "${selected}") {
-            sent
-            replied
-            bounced
-            unsubscribed
-          }
-        }
-      `, {}, headers).then(data => {
+    if (!selected) return;
+    const fetchStats = async () => {
+      try {
+        const data = await request(
+          API_URL,
+          `
+            query {
+              get_email_campaign_statistics(campaignId: "${selected}") {
+                sent
+                replied
+                bounced
+                unsubscribed
+              }
+            }
+          `,
+          {},
+          headers
+        );
         setStats(data.get_email_campaign_statistics);
-      });
-    }
+      } catch (err) {
+        setError("Erreur lors du chargement des KPI.");
+        console.error(err);
+      }
+    };
+    fetchStats();
   }, [selected]);
 
   return (
     <div style={{ padding: 20 }}>
       <h1>Suivi Campagne</h1>
+
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
       <label>Choisir une campagne :</label>
-      <select onChange={(e) => setSelected(e.target.value)} style={{ marginLeft: 10 }}>
+      <select
+        value={selected}
+        onChange={(e) => setSelected(e.target.value)}
+        style={{ marginLeft: 10 }}
+      >
         <option value="">--</option>
-        {campaigns.map(c => (
-          <option key={c._id} value={c._id}>{c.name}</option>
+        {campaigns.map((c) => (
+          <option key={c._id} value={c._id}>
+            {c.name}
+          </option>
         ))}
       </select>
 
