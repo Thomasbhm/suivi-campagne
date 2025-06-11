@@ -40,33 +40,43 @@ const App = () => {
     fetchCampaigns();
   }, []);
 
-  useEffect(() => {
-    if (!selected) return;
-    const fetchStats = async () => {
-      try {
-        const data = await request(
-          API_URL,
-          `
-            query {
-              get_email_campaign_statistics(campaignId: "${selected}") {
-                sent
-                replied
-                bounced
-                unsubscribed
-              }
-            }
-          `,
-          {},
-          headers
-        );
-        setStats(data.get_email_campaign_statistics);
-      } catch (err) {
-        setError("Erreur lors du chargement des KPI.");
-        console.error(err);
+useEffect(() => {
+  if (!selected) return;
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch(
+        `https://graphql.emelia.io/stats?campaignId=${selected}&detailed=true`,
+        {
+          headers: {
+            Authorization: "xRCRPFCWM7z7T3hxX5AkA1TPW6oIxpNi1tpebL9iX5G4VI",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Erreur lors de la récupération des stats");
       }
-    };
-    fetchStats();
-  }, [selected]);
+
+      const data = await response.json();
+
+      // Attention : adapter selon la structure de `data`
+      setStats({
+        sent: data.sent || 0,
+        replied: data.replied || 0,
+        bounced: data.bounced || 0,
+        unsubscribed: data.unsubscribed || 0,
+      });
+    } catch (err) {
+      setError("Erreur lors du chargement des KPI.");
+      console.error(err);
+    }
+  };
+
+  fetchStats();
+}, [selected]);
+
 
   return (
     <div style={{ padding: 20 }}>
