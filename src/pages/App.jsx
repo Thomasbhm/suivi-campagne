@@ -17,7 +17,7 @@ const App = () => {
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
 
-  // 1) Chargement de la liste des campagnes
+  // 1) Charger la liste des campagnes via GraphQL
   useEffect(() => {
     const fetchCampaigns = async () => {
       try {
@@ -43,7 +43,7 @@ const App = () => {
     fetchCampaigns();
   }, []);
 
-  // 2) Chargement des stats REST pour la campagne sélectionnée
+  // 2) Charger les stats REST pour la campagne sélectionnée
   useEffect(() => {
     if (!selected) return;
 
@@ -64,14 +64,17 @@ const App = () => {
         const data = await response.json();
         console.log("Réponse brute Emelia :", data);
 
-        const global = data[0]?.global;
-        // if (!global) throw new Error("Données statistiques introuvables");
+        // Utiliser data.global (pas un tableau)
+        const global = data.global;
+        if (!global) {
+          throw new Error("Données statistiques introuvables");
+        }
 
         setStats({
-          sent: global?.sent ?? 0,
-          replied: global?.replied ?? 0,
-          bounced: global?.bounced ?? 0,
-          unsubscribed: global?.unsubscribed ?? 0,
+          sent: global.sent ?? 0,
+          replied: global.replied ?? 0,
+          bounced: global.bounced ?? 0,
+          unsubscribed: global.unsubscribed ?? 0,
         });
       } catch (err) {
         console.error(err);
@@ -88,7 +91,7 @@ const App = () => {
 
       {error && <p style={{ color: "red", marginBottom: 20 }}>{error}</p>}
 
-      <label htmlFor="campaign-select">Choisir une campagne :</label>
+      <label htmlFor="campaign-select">Choisir une campagne :</label>
       <select
         id="campaign-select"
         value={selected}
@@ -106,10 +109,10 @@ const App = () => {
       {stats && (
         <div style={{ marginTop: 30 }}>
           <h2>KPI Globaux</h2>
-          <p>📤 Emails envoyés : {stats.sent}</p>
-          <p>💬 Réponses : {stats.replied}</p>
-          <p>❌ Bounces : {stats.bounced}</p>
-          <p>🚫 Désabonnements : {stats.unsubscribed}</p>
+          <p>📤 Emails envoyés : {stats.sent}</p>
+          <p>💬 Réponses : {stats.replied}</p>
+          <p>❌ Bounces : {stats.bounced}</p>
+          <p>🚫 Désabonnements : {stats.unsubscribed}</p>
         </div>
       )}
     </div>
